@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../store/authSlice";
+import { logout } from "../store/slices/authSlice"; // Updated import
 import { Container, Button, Typography } from "@mui/material";
 
 export default function Dashboard() {
@@ -9,7 +9,11 @@ export default function Dashboard() {
   return (
     <Container>
       <Typography variant="h4">Welcome, {user?.email}</Typography>
-      <Button variant="contained" color="secondary" onClick={() => dispatch(logout())}>
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={() => dispatch(logout())}
+      >
         Logout
       </Button>
     </Container>
