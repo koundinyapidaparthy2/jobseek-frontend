@@ -1,19 +1,21 @@
 import { Box, useTheme } from "@mui/material";
 
-// Animated bouncing dots loader, responsive and visually appealing
+// Full-screen loader with animated bouncing dots
 export default function Loading() {
   const theme = useTheme();
   return (
     <Box
       sx={{
-        width: "100%",
-        height: "100%",
-        minHeight: 120,
-        minWidth: 80,
+        position: "fixed", // stays on top
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        py: 2,
+        backgroundColor: "background.default", // optional background
+        zIndex: 9999, // ensure it's above everything
       }}
     >
       <Box

@@ -5,11 +5,11 @@ import {
   Link,
   IconButton,
   useTheme,
+  Divider,
 } from "@mui/material";
 import { useSelector } from "react-redux";
-// import Logo from "../assets/logo.svg"; // Replace with your logo path
-import { publicRoutes, privateRoutes } from "../routes/routesData"; // Import routes
-import socialMediaData from "../utils/socialMediaData"; // Import social media data
+import { publicRoutes, privateRoutes } from "../routes/routesData";
+import socialMediaData from "../utils/socialMediaData";
 
 export default function Footer() {
   const user = useSelector((state) => state.auth.user);
@@ -21,33 +21,39 @@ export default function Footer() {
       component="footer"
       sx={{
         width: "100%",
-        bgcolor: theme.palette.background.default,
+        backgroundColor: theme.palette.background.default,
         color: theme.palette.text.primary,
-        borderTop: "2px solid",
-        borderColor: theme.palette.primary.main,
+        boxShadow: "0 -2px 6px rgba(0, 0, 0, 0.06)", // soft elevation effect
+        pt: 4,
+        pb: 3,
+        px: { xs: 2, md: 6 },
+        borderTopLeftRadius: { xs: 12, md: 16 },
+        borderTopRightRadius: { xs: 12, md: 16 },
         mt: "auto",
-        py: 3,
-        px: 2,
       }}
     >
       <Grid container spacing={2} justifyContent="center" alignItems="center">
-        {/* Logo Section */}
+        {/* Logo Placeholder (Optional future update) */}
         <Grid item xs={12} sm={4} textAlign="center">
           {/* <img src={Logo} alt="JobSeekAI Logo" style={{ height: "50px" }} /> */}
         </Grid>
 
-        {/* Links Section */}
+        {/* Navigation Links */}
         <Grid item xs={12} sm={4} textAlign="center">
           {links.map(({ path, label }, index) => (
             <Link
               key={index}
               href={path}
-              underline="hover"
+              underline="none"
               sx={{
                 mx: 1,
+                fontSize: "0.85rem",
                 color: theme.palette.text.secondary,
-                fontSize: "0.9rem",
-                "&:hover": { color: theme.palette.primary.main },
+                transition: "color 0.2s",
+                "&:hover": {
+                  color: theme.palette.primary.main,
+                  textDecoration: "underline",
+                },
               }}
             >
               {label}
@@ -55,7 +61,7 @@ export default function Footer() {
           ))}
         </Grid>
 
-        {/* Social Media Section */}
+        {/* Social Icons */}
         <Grid item xs={12} sm={4} textAlign="center">
           {socialMediaData.map(({ name, href, icon: Icon }, index) => (
             <IconButton
@@ -63,21 +69,27 @@ export default function Footer() {
               href={href}
               target="_blank"
               aria-label={name}
-              sx={{ color: theme.palette.primary.main }}
+              sx={{
+                color: theme.palette.primary.main,
+                transition: "color 0.2s",
+                "&:hover": {
+                  color: theme.palette.secondary.main,
+                },
+              }}
             >
-              <Icon />
+              <Icon fontSize="small" />
             </IconButton>
           ))}
         </Grid>
       </Grid>
 
-      {/* Copyright Section */}
+      <Divider sx={{ mt: 3, mb: 2 }} />
+
       <Typography
         variant="body2"
         sx={{
           textAlign: "center",
-          mt: 2,
-          fontSize: "0.8rem",
+          fontSize: "0.75rem",
           color: theme.palette.text.secondary,
         }}
       >

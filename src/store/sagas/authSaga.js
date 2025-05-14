@@ -18,6 +18,7 @@ import {
   googleAuthApi,
   refreshTokenApi,
 } from "../../api/authApi";
+import { enqueueSnackbar } from "notistack";
 
 function* handleLogin(action) {
   try {
@@ -25,6 +26,9 @@ function* handleLogin(action) {
     yield put(loginSuccess(data));
   } catch (error) {
     yield put(loginFailure(error.message));
+    yield enqueueSnackbar(error.message || "Something went wrong", {
+      variant: "error",
+    });
   }
 }
 
@@ -34,6 +38,9 @@ function* handleSignup(action) {
     yield put(signupSuccess(data));
   } catch (error) {
     yield put(signupFailure(error.message));
+    yield enqueueSnackbar(error.message || "Something went wrong", {
+      variant: "error",
+    });
   }
 }
 
@@ -43,6 +50,9 @@ function* handleGoogleAuth(action) {
     yield put(googleAuthSuccess(data));
   } catch (error) {
     yield put(googleAuthFailure(error.message));
+    yield enqueueSnackbar(error.message || "Something went wrong", {
+      variant: "error",
+    });
   }
 }
 
@@ -52,6 +62,9 @@ function* handleRefreshToken(action) {
     yield put(refreshTokenSuccess(data));
   } catch (error) {
     yield put(refreshTokenFailure(error.message));
+    yield enqueueSnackbar(error.message || "Something went wrong", {
+      variant: "error",
+    });
   }
 }
 

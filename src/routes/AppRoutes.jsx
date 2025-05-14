@@ -10,6 +10,7 @@ import Footer from "../components/Footer";
 import { publicRoutes, privateRoutes } from "./routesData";
 import Loading from "../components/Loading";
 import { history } from "../utils/history";
+import { SnackbarProvider } from "notistack"; // 👈 Import
 
 function PublicRoute() {
   const user = useSelector((state) => state.auth.user);
@@ -50,6 +51,7 @@ function LayoutWithOptionalHeaderFooter({ children }) {
           justifyContent: isPublicPage ? "center" : "flex-start",
           width: "100%",
           maxWidth: "100vw",
+          marginTop: isPublicPage ? "0" : "56px", // Adjust for header height
         }}
       >
         <Container
@@ -75,38 +77,48 @@ export default function AppRoutes() {
   return (
     <ThemeProvider theme={currentTheme}>
       <CssBaseline />
-      <HistoryRouter history={history}>
-        <Suspense fallback={<Loading />}>
-          <LayoutWithOptionalHeaderFooter>
-            <Routes>
-              {/* Default entry: redirect based on auth */}
-              <Route
-                path="/"
-                element={
-                  user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />
-                }
-              />
+      <SnackbarProvider
+        maxSnack={3}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        autoHideDuration={3000}
+      >
+        <HistoryRouter history={history}>
+          <Suspense fallback={<Loading />}>
+            <LayoutWithOptionalHeaderFooter>
+              <Routes>
+                {/* Default entry: redirect based on auth */}
+                <Route
+                  path="/"
+                  element={
+                    user ? (
+                      <Navigate to="/dashboard" />
+                    ) : (
+                      <Navigate to="/login" />
+                    )
+                  }
+                />
 
-              {/* Public Routes */}
-              <Route element={<PublicRoute />}>
-                {publicRoutes.map(({ path, element: Element }, index) => (
-                  <Route key={index} path={path} element={<Element />} />
-                ))}
-              </Route>
+                {/* Public Routes */}
+                <Route element={<PublicRoute />}>
+                  {publicRoutes.map(({ path, element: Element }, index) => (
+                    <Route key={index} path={path} element={<Element />} />
+                  ))}
+                </Route>
 
-              {/* Private Routes */}
-              <Route element={<PrivateRoute />}>
-                {privateRoutes.map(({ path, element: Element }, index) => (
-                  <Route key={index} path={path} element={<Element />} />
-                ))}
-              </Route>
+                {/* Private Routes */}
+                <Route element={<PrivateRoute />}>
+                  {privateRoutes.map(({ path, element: Element }, index) => (
+                    <Route key={index} path={path} element={<Element />} />
+                  ))}
+                </Route>
 
-              {/* Catch-all fallback: redirect to login */}
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-          </LayoutWithOptionalHeaderFooter>
-        </Suspense>
-      </HistoryRouter>
+                {/* Catch-all fallback: redirect to login */}
+                <Route path="*" element={<Navigate to="/" />} />
+              </Routes>
+            </LayoutWithOptionalHeaderFooter>
+          </Suspense>
+        </HistoryRouter>
+      </SnackbarProvider>
     </ThemeProvider>
   );
 }

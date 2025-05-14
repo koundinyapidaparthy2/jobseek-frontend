@@ -2,12 +2,17 @@ const ENV = import.meta.env.VITE_ENV || "local";
 
 const configs = {
   local: {
-    backendUrl: import.meta.env.VITE_BACKEND_URL || "http://localhost:5000",
+    frontendUrl: import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173",
+    backendUrl: import.meta.env.VITE_BACKEND_URL || "http://localhost:8080",
   },
   staging: {
+    frontendUrl:
+      import.meta.env.VITE_FRONTEND_URL || "https://staging.yourfrontend.com",
     backendUrl: "https://staging.yourbackend.com",
   },
   production: {
+    frontendUrl:
+      import.meta.env.VITE_FRONTEND_URL || "https://yourfrontend.com",
     backendUrl: "https://api.yourbackend.com",
   },
 };

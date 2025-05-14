@@ -2,216 +2,313 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  Button,
   IconButton,
+  Button,
+  Box,
   Drawer,
   List,
   ListItem,
   ListItemText,
   Divider,
-  Box,
-  Switch,
+  Avatar,
+  Menu,
+  MenuItem,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
-import { Menu as MenuIcon, Close as CloseIcon } from "@mui/icons-material";
-import { useState } from "react";
-import { styled, useTheme } from "@mui/system";
+import { useState, useRef } from "react";
+import { Menu as MenuIcon } from "@mui/icons-material";
+import { Link, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import { publicRoutes, privateRoutes } from "../routes/routesData";
 import { toggleTheme } from "../store/slices/themeSlice";
-
-// Custom styled theme switch
-const ThemeSwitch = styled(Switch)(({ theme }) => ({
-  width: 62,
-  height: 34,
-  padding: 7,
-  "& .MuiSwitch-switchBase": {
-    margin: 1,
-    padding: 0,
-    transform: "translateX(6px)",
-    "&.Mui-checked": {
-      transform: "translateX(28px)",
-      "& .MuiSwitch-thumb:before": {
-        content: '"🌛"',
-        fontSize: "16px",
-      },
-      "& + .MuiSwitch-track": {
-        backgroundColor: theme.palette.primary.main,
-        opacity: 1,
-      },
-    },
-  },
-  "& .MuiSwitch-thumb": {
-    backgroundColor: theme.palette.background.default,
-    width: 23,
-    height: 23,
-    marginTop: "4.5px",
-    "&:before": {
-      content: '"🔆"', // Sun emoji for light mode
-      fontSize: "16px",
-    },
-  },
-  "& .MuiSwitch-track": {
-    width: "43px",
-    borderRadius: 34 / 2,
-    backgroundColor: theme.palette.primary.main,
-    opacity: 1,
-  },
-}));
+import { logout } from "../store/slices/authSlice";
+import {
+  publicRoutes,
+  privateRoutes,
+  templatesMenu,
+} from "../routes/routesData";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 export default function Header() {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const toggleDrawer = () => setMobileOpen(!mobileOpen);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [avatarAnchor, setAvatarAnchor] = useState(null);
+  const [templateAnchorEl, setTemplateAnchorEl] = useState(null);
+  const isTemplateMenuOpen = Boolean(templateAnchorEl);
 
-  const theme = useTheme();
+  const menuTimeout = useRef(null);
   const dispatch = useDispatch();
+  const theme = useTheme();
   const user = useSelector((state) => state.auth.user);
-
-  const handleThemeToggle = () => {
-    dispatch(toggleTheme());
-  };
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const location = useLocation();
 
   const navItems = user ? privateRoutes : publicRoutes;
+
+  const handleThemeToggle = () => dispatch(toggleTheme());
+  const handleLogout = () => dispatch(logout());
 
   return (
     <>
       <AppBar
         position="fixed"
+        elevation={10}
         sx={{
-          background: theme.palette.background.main,
-          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+          backgroundColor: theme.palette.background.default, // THEME-AWARE
+          zIndex: 1201,
+          borderRadius: 0, // remove any rounding
+          padding: "0px",
         }}
       >
-        <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Toolbar
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            minHeight: 56,
+            px: { xs: 2, md: 3 },
+            py: 0.5,
+          }}
+        >
+          {/* Logo */}
           <Typography
             variant="h6"
+            component={Link}
+            to="/dashboard"
             sx={{
+              textDecoration: "none",
               color: theme.palette.primary.main,
-              fontFamily: "Poppins, sans-serif",
               fontWeight: "bold",
+              fontFamily: "Poppins, sans-serif",
+              borderRadius: 2,
+              px: 1,
             }}
           >
             JobSeekAI
           </Typography>
 
           {/* Desktop Navigation */}
-          <Box
-            sx={{
-              display: { xs: "none", md: "flex" },
-              alignItems: "center",
-              gap: 2,
-            }}
-          >
-            {navItems.map(({ path }, index) => (
-              <Button
-                key={index}
-                color="inherit"
-                component={Link}
-                to={path}
-                sx={{
-                  color: theme.palette.primary.main,
-                  fontFamily: "Poppins, sans-serif",
-                  fontWeight: "bold",
-                }}
-              >
-                {path.replace("/", "").toUpperCase() || "HOME"}
-              </Button>
-            ))}
-            <ThemeSwitch
-              onClick={handleThemeToggle}
-              title="Toggle Theme"
-              sx={{
-                color: "#fff",
-              }}
-            >
-              Theme
-            </ThemeSwitch>
-          </Box>
+          {!isMobile && (
+            <Box sx={{ display: "flex", gap: 2 }}>
+              {privateRoutes
+                .filter(
+                  ({ label }) =>
+                    label !== "Resume" &&
+                    label !== "Cover Letter" &&
+                    label !== "LinkedIn" &&
+                    label !== "Email"
+                )
+                .map(({ path, label }) => (
+                  <Button
+                    key={path}
+                    component={Link}
+                    to={path}
+                    sx={{
+                      fontSize: "0.875rem",
+                      padding: "4px 8px",
+                      fontFamily: "Poppins",
+                      color:
+                        location.pathname === path
+                          ? theme.palette.primary.main
+                          : theme.palette.text.primary,
+                      fontWeight: location.pathname === path ? "bold" : 500,
+                      borderBottom:
+                        location.pathname === path
+                          ? `2px solid ${theme.palette.primary.main}`
+                          : "none",
+                      borderRadius: 1,
+                      textTransform: "none",
+                    }}
+                  >
+                    {label}
+                  </Button>
+                ))}
 
-          {/* Mobile Menu Icon */}
-          <IconButton
-            color="inherit"
-            edge="end"
-            sx={{ display: { xs: "block", md: "none" } }}
-            onClick={toggleDrawer}
-          >
-            <MenuIcon />
-          </IconButton>
+              {/* Templates Dropdown */}
+              <Box>
+                <Button
+                  onClick={(e) =>
+                    setTemplateAnchorEl((prev) =>
+                      prev ? null : e.currentTarget
+                    )
+                  }
+                  endIcon={
+                    <ExpandMoreIcon
+                      sx={{
+                        transition: "0.2s",
+                        transform: isTemplateMenuOpen
+                          ? "rotate(180deg)"
+                          : "rotate(0deg)",
+                      }}
+                    />
+                  }
+                  sx={{
+                    fontSize: "0.875rem",
+                    padding: "4px 8px",
+                    fontFamily: "Poppins",
+                    color: theme.palette.text.primary,
+                    fontWeight: "medium",
+                    borderRadius: "8px",
+                    textTransform: "none",
+                  }}
+                >
+                  Templates
+                </Button>
+
+                <Menu
+                  anchorEl={templateAnchorEl}
+                  open={isTemplateMenuOpen}
+                  onClose={() => setTemplateAnchorEl(null)}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "left",
+                  }}
+                  PaperProps={{
+                    sx: {
+                      borderRadius: 2,
+                      backgroundColor: theme.palette.background.default,
+                      color: theme.palette.text.primary,
+                      mt: 1,
+                      minWidth: 180,
+                      boxShadow: theme.shadows[4],
+                    },
+                  }}
+                >
+                  {templatesMenu.map(({ path, label }) => (
+                    <MenuItem
+                      key={path}
+                      component={Link}
+                      to={path}
+                      onClick={() => setTemplateAnchorEl(null)}
+                      selected={location.pathname === path}
+                      sx={{ borderRadius: 1 }}
+                    >
+                      {label}
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </Box>
+            </Box>
+          )}
+
+          {/* Controls */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+            <IconButton onClick={handleThemeToggle} title="Toggle Theme">
+              {theme.palette.mode === "dark" ? (
+                <Brightness7Icon />
+              ) : (
+                <Brightness4Icon />
+              )}
+            </IconButton>
+
+            {user && (
+              <>
+                <IconButton onClick={(e) => setAvatarAnchor(e.currentTarget)}>
+                  <Avatar sx={{ width: 32, height: 32 }}>
+                    {user.name?.charAt(0) || "U"}
+                  </Avatar>
+                </IconButton>
+                <Menu
+                  anchorEl={avatarAnchor}
+                  open={Boolean(avatarAnchor)}
+                  onClose={() => setAvatarAnchor(null)}
+                  PaperProps={{
+                    sx: {
+                      borderRadius: 2,
+                      backgroundColor: theme.palette.background.default,
+                      color: theme.palette.text.primary,
+                      mt: 1,
+                    },
+                  }}
+                >
+                  <MenuItem
+                    onClick={() => setAvatarAnchor(null)}
+                    component={Link}
+                    to="/profile"
+                  >
+                    Profile
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      setAvatarAnchor(null);
+                      dispatch(logout());
+                    }}
+                  >
+                    Logout
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
+
+            {isMobile && (
+              <IconButton onClick={() => setDrawerOpen(true)}>
+                <MenuIcon />
+              </IconButton>
+            )}
+          </Box>
         </Toolbar>
       </AppBar>
 
       {/* Mobile Drawer */}
-      <Drawer anchor="right" open={mobileOpen} onClose={toggleDrawer}>
-        <Box
-          sx={{
-            width: 250,
-            backgroundColor: theme.palette.background.paper,
-            height: "100%",
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "10px 20px",
-            }}
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        PaperProps={{
+          sx: {
+            backgroundColor: theme.palette.background.default,
+            color: theme.palette.text.primary,
+            borderRadius: "16px 0 0 16px",
+          },
+        }}
+      >
+        <Box sx={{ width: 250, py: 2 }}>
+          <Typography
+            textAlign="center"
+            variant="h6"
+            sx={{ fontWeight: "bold", mb: 2 }}
           >
-            <Typography
-              variant="h6"
-              sx={{
-                color: theme.palette.primary.main,
-                fontFamily: "Poppins, sans-serif",
-                fontWeight: "bold",
-              }}
-            >
-              Menu
-            </Typography>
-            <IconButton onClick={toggleDrawer}>
-              <CloseIcon
-                sx={{
-                  color: theme.palette.primary.main,
-                }}
-              />
-            </IconButton>
-          </Box>
+            Navigation
+          </Typography>
           <Divider />
           <List>
-            {navItems.map(({ path }, index) => (
+            {navItems.map(({ path, label }) => (
               <ListItem
                 button
-                key={index}
+                key={path}
                 component={Link}
                 to={path}
-                onClick={toggleDrawer}
+                onClick={() => setDrawerOpen(false)}
+                sx={{ borderRadius: 1 }}
               >
-                <ListItemText
-                  primary={path.replace("/", "").toUpperCase() || "HOME"}
-                  sx={{
-                    color: theme.palette.primary.main,
-                    fontFamily: "Roboto, sans-serif",
-                  }}
-                />
+                <ListItemText primary={label} />
               </ListItem>
             ))}
           </List>
           <Divider />
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              padding: "10px 0",
-            }}
-          >
-            <ThemeSwitch
-              onClick={handleThemeToggle}
-              title="Toggle Theme"
-              sx={{
-                color: "#fff",
-              }}
-            >
-              Theme
-            </ThemeSwitch>
+          <Box sx={{ textAlign: "center", mt: 2 }}>
+            <Button onClick={handleThemeToggle} size="small" variant="outlined">
+              Toggle Theme
+            </Button>
+            {user && (
+              <Button
+                onClick={() => {
+                  setDrawerOpen(false);
+                  dispatch(logout());
+                }}
+                size="small"
+                variant="text"
+                color="error"
+                sx={{ mt: 1 }}
+              >
+                Logout
+              </Button>
+            )}
           </Box>
         </Box>
       </Drawer>

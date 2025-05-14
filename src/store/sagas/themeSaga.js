@@ -9,6 +9,6 @@ function* handleSetThemeAsync(action) {
   yield put(toggleTheme());
 }
 
-export function* watchThemeSaga() {
+export default function* watchThemeSaga() {
   yield takeEvery(setThemeAsync.type, handleSetThemeAsync);
 }
