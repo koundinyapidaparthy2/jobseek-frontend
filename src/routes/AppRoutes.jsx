@@ -1,5 +1,5 @@
 import { unstable_HistoryRouter as HistoryRouter } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ThemeProvider, CssBaseline, Container, Box } from "@mui/material";
 import { Suspense } from "react";
 import { Routes, Route, Navigate, Outlet, useLocation } from "react-router-dom";
@@ -11,6 +11,8 @@ import { publicRoutes, privateRoutes } from "./routesData";
 import Loading from "../components/Loading";
 import { history } from "../utils/history";
 import { SnackbarProvider } from "notistack"; // 👈 Import
+import { useEffect } from "react";
+import { getProfileRequest } from "../store/slices/profileSlice";
 
 function PublicRoute() {
   const user = useSelector((state) => state.auth.user);
@@ -24,9 +26,14 @@ function PrivateRoute() {
 
 function LayoutWithOptionalHeaderFooter({ children }) {
   const user = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch();
   const location = useLocation();
   const isPublicPage = ["/login", "/signup"].includes(location.pathname);
-
+  useEffect(() => {
+    if (user) {
+      dispatch(getProfileRequest());
+    }
+  }, []);
   return (
     <Box
       sx={{

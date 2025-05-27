@@ -1,18 +1,43 @@
-import { Box, Typography, Button, Stack, useTheme } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Button,
+  Stack,
+  useTheme,
+  Link,
+  Paper,
+} from "@mui/material";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
+import CloudDownloadIcon from "@mui/icons-material/CloudDownload";
 import { useDropzone } from "react-dropzone";
 import { useState } from "react";
-
-export default function ResumeUploader() {
+import axios from "axios";
+import { useDispatch } from "react-redux";
+import { downloadResumeRequest } from "../../store/slices/profileSlice";
+export default function ResumeUploader({ resumeUrl, coverLetterUrl }) {
   const theme = useTheme();
+  const dispatch = useDispatch();
+
   const [resumeFile, setResumeFile] = useState(null);
   const [coverFile, setCoverFile] = useState(null);
+  const downloadViaAnchor = (url, filename) => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", filename); // Doesn't force download for signed URLs
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
 
   const handleUpload = (acceptedFiles, type) => {
     const file = acceptedFiles[0];
     if (type === "resume") setResumeFile(file);
     if (type === "cover") setCoverFile(file);
-    // TODO: call upload API
+    // TODO: call upload API here
+  };
+
+  const onClickDownloadResume = () => {
+    dispatch(downloadResumeRequest({ resumeUrl }));
   };
 
   const ResumeDropzone = useDropzone({
@@ -35,61 +60,103 @@ export default function ResumeUploader() {
     },
   });
 
+  const dropzoneStyles = {
+    border: "2px dashed #ccc",
+    borderRadius: "12px",
+    backgroundColor: "#fafafa",
+    p: 4,
+    textAlign: "center",
+    cursor: "pointer",
+    transition: "0.3s ease",
+    "&:hover": {
+      borderColor: "primary.main",
+      backgroundColor: "#f4f9ff",
+    },
+  };
+
   return (
-    <Stack spacing={3}>
-      <Typography variant="h6">Upload Resume & Cover Letter</Typography>
+    <Stack spacing={4}>
+      <Typography variant="h6" fontWeight={600}>
+        Resume & Cover Letter
+      </Typography>
 
-      <Box
-        {...ResumeDropzone.getRootProps()}
-        sx={{
-          border: "2px dashed",
-          borderColor: "#ccc",
-          borderRadius: 2,
-          backgroundColor: "#f9f9f9",
-          p: 4,
-          textAlign: "center",
-          transition: "all 0.2s",
-          "&:hover": {
-            borderColor: "primary.main",
-            backgroundColor: "#f0f0f0",
-          },
-        }}
-      >
-        <input {...ResumeDropzone.getInputProps()} />
-        <UploadFileIcon sx={{ fontSize: 40, color: "text.secondary" }} />
-        <Typography variant="body2" mt={1}>
-          Drag & drop <strong>resume</strong> here, or click to browse
+      {/* Resume Section */}
+      <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }}>
+        <Typography variant="subtitle1" fontWeight={500} gutterBottom>
+          Resume
         </Typography>
-        {resumeFile && (
-          <Typography variant="caption" mt={1}>
-            {resumeFile.name}
-          </Typography>
-        )}
-      </Box>
 
-      <Box
-        {...CoverDropzone.getRootProps()}
-        sx={{
-          border: "2px dashed",
-          borderColor: "#ccc",
-          borderRadius: 2,
-          p: 3,
-          textAlign: "center",
-          cursor: "pointer",
-          backgroundColor: theme.palette.background.default,
-        }}
-      >
-        <input {...CoverDropzone.getInputProps()} />
-        <UploadFileIcon fontSize="large" />
-        <Typography variant="body2" mt={1}>
-          Drag & drop <strong>cover letter</strong> here, or click to browse
-        </Typography>
-        {coverFile && (
-          <Typography variant="caption" mt={1}>
-            Selected: {coverFile.name}
-          </Typography>
+        {resumeUrl && (
+          <Box mb={2}>
+            <Button
+              startIcon={<CloudDownloadIcon />}
+              variant="outlined"
+              sx={{
+                fontWeight: 600,
+                borderRadius: 2,
+                px: 2.5,
+                py: 1.2,
+              }}
+              onClick={onClickDownloadResume}
+            >
+              Download Resume
+            </Button>
+          </Box>
         )}
-      </Box>
+
+        <Box {...ResumeDropzone.getRootProps()} sx={dropzoneStyles}>
+          <input {...ResumeDropzone.getInputProps()} />
+          <UploadFileIcon sx={{ fontSize: 48, color: "primary.main" }} />
+          <Typography variant="body2" mt={1}>
+            Drag & drop <strong>resume</strong> here, or click to upload new
+          </Typography>
+          {resumeFile && (
+            <Typography variant="caption" mt={1}>
+              Selected: {resumeFile.name}
+            </Typography>
+          )}
+        </Box>
+      </Paper>
+
+      {/* Cover Letter Section */}
+      <Paper variant="outlined" sx={{ p: 3, borderRadius: 3 }}>
+        <Typography variant="subtitle1" fontWeight={500} gutterBottom>
+          Cover Letter
+        </Typography>
+
+        {coverLetterUrl && (
+          <Box mb={2}>
+            <Link href={coverLetterUrl} target="_blank" underline="none">
+              <Button
+                startIcon={<CloudDownloadIcon />}
+                variant="outlined"
+                sx={{
+                  fontWeight: 600,
+                  borderRadius: 2,
+                  px: 2.5,
+                  py: 1.2,
+                }}
+              >
+                Download Cover Letter
+              </Button>
+            </Link>
+          </Box>
+        )}
+
+        <Box {...CoverDropzone.getRootProps()} sx={dropzoneStyles}>
+          <input {...CoverDropzone.getInputProps()} />
+          <UploadFileIcon sx={{ fontSize: 48, color: "primary.main" }} />
+          <Typography variant="body2" mt={1}>
+            Drag & drop <strong>cover letter</strong> here, or click to upload
+            new
+          </Typography>
+          {coverFile && (
+            <Typography variant="caption" mt={1}>
+              Selected: {coverFile.name}
+            </Typography>
+          )}
+        </Box>
+      </Paper>
     </Stack>
   );
 }

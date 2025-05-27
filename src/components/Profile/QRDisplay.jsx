@@ -67,14 +67,6 @@ export default function QRDisplay() {
           </IconButton>
         </Tooltip>
       </Stack>
-
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        sx={{ mt: 1, wordBreak: "break-all", display: "block" }}
-      >
-        {profileUrl}
-      </Typography>
     </Box>
   );
 }
