@@ -26,3 +26,6 @@ dist-ssr
 # local files
 
 package-lock.json
+
+
+.firebase
